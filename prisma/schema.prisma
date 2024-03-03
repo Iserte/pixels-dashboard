@@ -1,0 +1,58 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id              Int      @id @default(autoincrement())
+  name            String   @unique
+  isVip           Boolean  @default(false)
+  energy          Int      @default(1000)
+  coin            Int      @default(0)
+  pixel           Int      @default(0)
+  currentSeed     String   @default("Popberry Seeds")
+  seeds           Int      @default(0)
+  landOneState    String   @default("EMPTY")
+  landOneUpdate   DateTime @default(now())
+  landTwoState    String   @default("EMPTY")
+  landTwoUpdate   DateTime @default(now())
+  landThreeState  String   @default("EMPTY")
+  landThreeUpdate DateTime @default(now())
+  energyUpdate    DateTime @default(now())
+  vipUpdate       DateTime @default(now())
+  mailUpdate      DateTime @default(now())
+  carnivalUpdate  DateTime @default(now())
+
+  tasks Tasks[]
+  eggs  Eggs[]
+}
+
+model Tasks {
+  id             Int      @id @default(autoincrement())
+  itemName       String
+  itemQuantity   Int
+  rewardType     String
+  rewardQuantity Int
+  expiresAt      DateTime @default(now())
+
+  account   Account @relation(fields: [accountId], references: [id])
+  accountId Int
+}
+
+model Eggs {
+  id         Int      @id @default(autoincrement())
+  landId     Int
+  landUpdate DateTime @default(now())
+
+  account   Account @relation(fields: [accountId], references: [id])
+  accountId Int
+
+  @@unique([landId, accountId])
+}
