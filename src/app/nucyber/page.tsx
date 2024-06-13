@@ -20,16 +20,14 @@ export const headers = [
   "Energia",
   "Coins",
   "$PIXEL",
-  "Sementes",
-  "VIP",
-  "Sauna VIP",
-  "Land #2130",
-  "Land #2131",
-  "Land #270",
-  "Arvores",
+  "Business Level",
+  "Inventário",
+  "Craft",
+  "Coletar Caixa",
+  "Ativo?",
 ];
 
-export default function Accounts() {
+export default function NuCyber() {
   const [accounts, setAccounts] = useState<IAccount[]>();
   const [pixelPrice, setPixelPrice] = useState(0);
 
@@ -63,7 +61,28 @@ export default function Accounts() {
     );
   };
 
-  const handleSetActive = async (path: string, setStatus: boolean) => {
+  // const handleSetActive = async (path: string, setStatus: boolean) => {
+  //   setAccounts(
+  //     (
+  //       await (
+  //         await fetch(process.env.NEXT_PUBLIC_HOST_URL + "/api/accounts", {
+  //           cache: "no-cache",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //           },
+  //           method: "PUT",
+  //           body: JSON.stringify({ path, setStatus }),
+  //         })
+  //       ).json()
+  //     ).accounts
+  //   );
+  // };
+
+  const handleSetActive = async (
+    path: string,
+    id: string | undefined = undefined,
+    setStatus: boolean | undefined = undefined
+  ) => {
     setAccounts(
       (
         await (
@@ -73,7 +92,7 @@ export default function Accounts() {
               "Content-Type": "application/json",
             },
             method: "PUT",
-            body: JSON.stringify({ path, setStatus }),
+            body: JSON.stringify({ path, id, setStatus }),
           })
         ).json()
       ).accounts
@@ -292,24 +311,22 @@ export default function Accounts() {
           <td className="px-2 text-center font-bold">-</td>
           <td className="px-2 text-center font-bold">-</td>
           <td className="px-2 text-center font-bold">-</td>
-          <td className="px-2 text-center font-bold">-</td>
-          <td className="px-2 text-center font-bold">-</td>
           <td className="px-2 text-center font-bold accent-lime-400">
             <input
               type="checkbox"
-              name="isCityTreeActive"
-              id="isCityTreeActive"
+              name="isNuCyberActive"
+              id="isNuCyberActive"
               checked={
-                accounts &&
-                accounts.find((account) => !account.isCityTreeActive)
+                accounts && accounts.find((account) => !account.isNuCyberActive)
                   ? false
                   : true
               }
               onChange={async () =>
                 handleSetActive(
-                  "isCityTreeActive",
+                  "isNuCyberActive",
+                  undefined,
                   accounts &&
-                    !accounts.find((account) => !account.isCityTreeActive)
+                    !accounts.find((account) => !account.isNuCyberActive)
                     ? false
                     : true
                 )
@@ -403,124 +420,76 @@ export default function Accounts() {
                 </td>
 
                 <td className="border border-zinc-800 px-2 text-center">
+                  <div className="flex items-center justify-between gap-2">
+                    <Image
+                      alt="Business Level"
+                      width={1}
+                      height={1}
+                      src="/business.png"
+                      className="size-4"
+                    />
+                    <span>
+                      {JSON.parse(account.levels).business.level || 0}
+                    </span>
+                  </div>
+                </td>
+
+                <td className="border border-zinc-800 px-2 text-center">
                   <div className="flex flex-col justify-center items-center">
-                    <span className="leading-none">{account.seeds}</span>
+                    <span className="leading-none">{account.nuCyberBoxes}</span>
                     <span className="text-xs leading-none text-zinc-400">
-                      {account.currentSeed}
+                      Box of Supplies
                     </span>
                   </div>
                 </td>
 
                 <td
-                  className={`border border-zinc-800 px-2 max-w-32 text-center ${
-                    new Date() > new Date(account.vipExpiration)
-                      ? ""
-                      : new Date() >
-                        AddDays(new Date(account.vipExpiration), -3)
-                      ? "text-red-400"
-                      : new Date() >
-                        AddDays(new Date(account.vipExpiration), -7)
-                      ? "text-orange-400"
-                      : "text-lime-400"
-                  }
-                  `}
+                  className={`border border-zinc-800 px-2 max-w-32 text-center`}
                 >
-                  {new Date() > new Date(account.vipExpiration)
-                    ? "Free"
-                    : moment(account.vipExpiration).format("DD/MM/YYYY")}
-                </td>
-
-                <td
-                  className={`border border-zinc-800 px-2 max-w-32 text-center ${
-                    new Date() > new Date(account.vipUpdate)
-                      ? "text-red-400"
-                      : "text-lime-400"
-                  }`}
-                >
-                  {new Date() > new Date(account.vipExpiration)
-                    ? "-"
-                    : moment(account.vipUpdate).startOf("minutes").fromNow()}
-                </td>
-
-                <td className="border border-zinc-800 px-2 max-w-32 text-center">
                   <div>
-                    {
-                      <p
-                        className={`leading-none ${
-                          account.landOneState === "EMPTY"
-                            ? ""
-                            : new Date() > new Date(account.landOneUpdate)
-                            ? "text-red-400"
-                            : "text-lime-400"
-                        }`}
-                      >
-                        {account.landOneState === "EMPTY"
-                          ? "Vazio "
-                          : "Coletar: " +
-                            moment(account.landOneUpdate)
-                              .startOf("minutes")
-                              .fromNow()}
-                      </p>
-                    }
-                  </div>
-                </td>
-
-                <td className="border border-zinc-800 px-2 max-w-32 text-center">
-                  <div>
-                    {
-                      <p
-                        className={`leading-none ${
-                          account.landTwoState === "EMPTY"
-                            ? ""
-                            : new Date() > new Date(account.landTwoUpdate)
-                            ? "text-red-400"
-                            : "text-lime-400"
-                        }`}
-                      >
-                        {account.landTwoState === "EMPTY"
-                          ? "Vazio "
-                          : "Coletar: " +
-                            moment(account.landTwoUpdate)
-                              .startOf("minutes")
-                              .fromNow()}
-                      </p>
-                    }
-                  </div>
-                </td>
-
-                <td className="border border-zinc-800 px-2 max-w-32 text-center">
-                  <div>
-                    {
-                      <p
-                        className={`leading-none ${
-                          account.landThreeState === "EMPTY"
-                            ? ""
-                            : new Date() > new Date(account.landThreeUpdate)
-                            ? "text-red-400"
-                            : "text-lime-400"
-                        }`}
-                      >
-                        {account.landThreeState === "EMPTY"
-                          ? "Vazio "
-                          : "Coletar: " +
-                            moment(account.landThreeUpdate)
-                              .startOf("minutes")
-                              .fromNow()}
-                      </p>
-                    }
+                    <p
+                      className={` leading-none ${
+                        !account.isNuCyberActive
+                          ? "text-gray-400"
+                          : new Date() > new Date(account.nuCyberCraftUpdate)
+                          ? "text-red-400"
+                          : "text-lime-400"
+                      }`}
+                    >
+                      {`${account.nuCyberCraftName.trim()}: ` +
+                        moment(account.nuCyberCraftUpdate)
+                          .startOf("minutes")
+                          .fromNow()}
+                    </p>
                   </div>
                 </td>
 
                 <td
                   className={`border border-zinc-800 px-2 max-w-32 text-center ${
-                    !account.isCityTreeActive
+                    !account.isNuCyberActive
                       ? "text-gray-400"
-                      : new Date() > new Date(account.cityTreeUpdate)
+                      : new Date() > new Date(account.nuCyberUpdate)
                       ? "text-red-400"
                       : "text-lime-400"
                   }`}
                 >
-                  {moment(account.cityTreeUpdate).startOf("minutes").fromNow()}
+                  {moment(account.nuCyberUpdate).startOf("minutes").fromNow()}
+                </td>
+
+                <td
+                  className={
+                    "border border-zinc-800 px-2 max-w-32 text-center accent-lime-400"
+                  }
+                >
+                  <input
+                    type="checkbox"
+                    name="isNuCyberActive"
+                    id="isNuCyberActive"
+                    checked={account.isNuCyberActive}
+                    onChange={async () =>
+                      handleSetActive("isNuCyberActive", account.id)
+                    }
+                  />
                 </td>
               </tr>
             );

@@ -1,21 +1,56 @@
-import { Tasks } from ".prisma/client";
+"use client";
+
+import { Tasks, Account } from ".prisma/client";
+import { RefreshCw } from "lucide-react";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+
+interface PrismaTasks extends Tasks {
+  account: Account;
+}
 
 type APIResponse = {
   tasks: {
-    pixelTasks: Tasks[],
-    coinTasks: Tasks[],
-  },
+    pixelTasks: PrismaTasks[];
+    coinTasks: PrismaTasks[];
+  };
   count: {
-    pixelTasksCount: number,
-    coinTasksCount: number,
-  }
-}
+    pixelTasksCount: number;
+    coinTasksCount: number;
+  };
+};
 
-export default async function () {
-  const { tasks, count } = await (await fetch("http://localhost:3000/api/tasks", {
-    cache: "no-cache"
-  })).json() as APIResponse
-  const headers = ["Conta", "Item", "Quantidade", "Recompensa"];
+const headers = ["Conta", "Item", "Quantidade", "Recompensa", "Entregar"];
+
+export default function TasksPage() {
+  const [apiResponse, setApiResponse] = useState<APIResponse>();
+
+  useEffect(() => {
+    getApiData();
+    setInterval(getApiData, 1 * 60 * 1000);
+  }, []);
+
+  const getApiData = async () => {
+    setApiResponse(
+      await (
+        await fetch(process.env.NEXT_PUBLIC_HOST_URL + "/api/tasks", {
+          cache: "no-cache",
+        })
+      ).json()
+    );
+  };
+
+  async function refreshTask(id: number) {
+    setApiResponse(
+      await (
+        await fetch(process.env.NEXT_PUBLIC_HOST_URL + "/api/tasks", {
+          cache: "no-cache",
+          method: "PUT",
+          body: JSON.stringify({ id }),
+        })
+      ).json()
+    );
+  }
 
   // const handleSort = (event: React.MouseEvent<HTMLTableCellElement>) => {
   //   const sortBy = event.currentTarget.textContent!;
@@ -118,14 +153,14 @@ export default async function () {
   // };
 
   return (
-    <table className="relative border-collapse">
+    <table className="border-collapse overflow-x-auto relative w-full max-w-screen-md">
       <thead className="border-zinc-800 border-b-zinc-600 bg-zinc-950 border border-b-2 sticky top-0">
         <tr>
           {headers.map((header) => (
             <th
               key={header}
               className="hover:cursor-pointer border-x border-zinc-800 px-4"
-            // onClick={handleSort}
+              // onClick={handleSort}
             >
               {header}
             </th>
@@ -137,81 +172,81 @@ export default async function () {
         >
           <td className="border-y border-l border-zinc-800 px-2 text-center"></td>
 
-          <td className="border-y border-zinc-800 px-2 text-center">
-            TOTAL
-          </td>
+          <td className="border-y border-zinc-800 px-2 text-center">TOTAL</td>
 
           <td className="border-y border-zinc-800 px-2 text-center"></td>
 
           <td className="border border-zinc-800 px-2 text-center">
             <div className="flex items-center justify-between gap-2">
-              <img src="/pixel.png" className="size-4" />
-              <span>{count.pixelTasksCount}</span>
+              <Image
+                alt="$PIXEL"
+                width={1}
+                height={1}
+                src="/pixel.png"
+                className="size-4"
+              />
+              <span>
+                {apiResponse &&
+                  apiResponse.count &&
+                  apiResponse.count.pixelTasksCount}
+              </span>
             </div>
           </td>
         </tr>
       </thead>
       <tbody className="bg-zinc-900">
-        {tasks.pixelTasks.map((task) => {
-          return (
-            <tr
-              key={task.id}
-              className={`border-b border-zinc-800 hover:bg-zinc-700 ${task.rewardType === "PIXEL" &&
-                [
-                  "Popberry",
-                  "Butterberry",
-                  "Clover",
-                  "Grainbow",
-                  "Java Bean",
-                  "Bluzberry Cotton Candy",
-                  "Razzleberry Cotton Candy",
-                  "Bluzzleberry Swirl Cotton Candy",
-                  "Heartbeet",
-                  "Orange Grumpkin",
-                  // "Grumpkin",
-                  // "Scarrot",
-                  // "Watermint",
-                  // "Hotato",
-                  // "Popberry Wine",
-                  // "Sap",
-                  // "Popberry Pie",
-                  // "Flour",
-                  // "Grumpkin Wine",
-                  // "Popberry Loaf",
-                  // "Construction Powder",
-                  // "Wax",
-                  // "Clay",
-                  // "Pancakes",
-                ].includes(task.itemName)
-                ? "bg-green-900"
-                : ""
+        {apiResponse &&
+          apiResponse.tasks &&
+          apiResponse.tasks.pixelTasks &&
+          apiResponse.tasks.pixelTasks.map((task) => {
+            return (
+              <tr
+                key={task.id}
+                className={`border-b border-zinc-800 hover:bg-zinc-700 ${
+                  task.account.name.startsWith("🛒") ? "bg-green-900" : ""
                 }`}
-            >
-              <td className="border border-zinc-800 px-2">
-                {task.account.name}
-              </td>
+              >
+                <td className="border border-zinc-800 px-2">
+                  {task.account.name}
+                </td>
 
-              <td className="border border-zinc-800 px-2">
-                {task.itemName}
-              </td>
+                <td className="border border-zinc-800 px-2">{task.itemName}</td>
 
-              <td className="border border-zinc-800 px-2 text-center max-w-8">
-                {task.itemQuantity}
-              </td>
+                <td className="border border-zinc-800 px-2 text-center max-w-8">
+                  {task.itemQuantity}
+                </td>
 
-              <td className="border border-zinc-800 px-2 text-center">
-                <div className="flex items-center justify-between gap-2">
-                  {task.rewardType === "PIXEL" ? (
-                    <img src="/pixel.png" className="size-4" />
-                  ) : (
-                    <img src="/coin.png" className="size-4" />
-                  )}
-                  <span>{task.rewardQuantity}</span>
-                </div>
-              </td>
-            </tr>
-          );
-        })}
+                <td className="border border-zinc-800 px-2 text-center">
+                  <div className="flex items-center justify-between gap-2">
+                    {task.rewardType === "PIXEL" ? (
+                      <Image
+                        alt="$PIXEL"
+                        width={1}
+                        height={1}
+                        src="/pixel.png"
+                        className="size-4"
+                      />
+                    ) : (
+                      <Image
+                        alt="COIN"
+                        width={1}
+                        height={1}
+                        src="/coin.png"
+                        className="size-4"
+                      />
+                    )}
+                    <span>{task.rewardQuantity}</span>
+                  </div>
+                </td>
+                <td
+                  className="border border-zinc-800 px-2 hover:cursor-pointer"
+                  onClick={() => refreshTask(task.id)}
+                >
+                  <RefreshCw className="size-4 w-full" />
+                </td>
+              </tr>
+            );
+          })}
       </tbody>
     </table>
   );

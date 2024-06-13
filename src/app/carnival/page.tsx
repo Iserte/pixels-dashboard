@@ -20,16 +20,13 @@ export const headers = [
   "Energia",
   "Coins",
   "$PIXEL",
-  "Sementes",
-  "VIP",
-  "Sauna VIP",
-  "Land #2130",
-  "Land #2131",
-  "Land #270",
-  "Arvores",
+  "Inventário",
+  "Plantação",
+  "Coletar Sementes",
+  "Ativo?",
 ];
 
-export default function Accounts() {
+export default function Carnival() {
   const [accounts, setAccounts] = useState<IAccount[]>();
   const [pixelPrice, setPixelPrice] = useState(0);
 
@@ -63,7 +60,28 @@ export default function Accounts() {
     );
   };
 
-  const handleSetActive = async (path: string, setStatus: boolean) => {
+  // const handleSetActive = async (path: string, setStatus: boolean) => {
+  //   setAccounts(
+  //     (
+  //       await (
+  //         await fetch(process.env.NEXT_PUBLIC_HOST_URL + "/api/accounts", {
+  //           cache: "no-cache",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //           },
+  //           method: "PUT",
+  //           body: JSON.stringify({ path, setStatus }),
+  //         })
+  //       ).json()
+  //     ).accounts
+  //   );
+  // };
+
+  const handleSetActive = async (
+    path: string,
+    id: string | undefined = undefined,
+    setStatus: boolean | undefined = undefined
+  ) => {
     setAccounts(
       (
         await (
@@ -73,7 +91,7 @@ export default function Accounts() {
               "Content-Type": "application/json",
             },
             method: "PUT",
-            body: JSON.stringify({ path, setStatus }),
+            body: JSON.stringify({ path, id, setStatus }),
           })
         ).json()
       ).accounts
@@ -291,25 +309,23 @@ export default function Accounts() {
           <td className="px-2 text-center font-bold">-</td>
           <td className="px-2 text-center font-bold">-</td>
           <td className="px-2 text-center font-bold">-</td>
-          <td className="px-2 text-center font-bold">-</td>
-          <td className="px-2 text-center font-bold">-</td>
-          <td className="px-2 text-center font-bold">-</td>
           <td className="px-2 text-center font-bold accent-lime-400">
             <input
               type="checkbox"
-              name="isCityTreeActive"
-              id="isCityTreeActive"
+              name="isCarnivalActive"
+              id="isCarnivalActive"
               checked={
                 accounts &&
-                accounts.find((account) => !account.isCityTreeActive)
+                accounts.find((account) => !account.isCarnivalActive)
                   ? false
                   : true
               }
               onChange={async () =>
                 handleSetActive(
-                  "isCityTreeActive",
+                  "isCarnivalActive",
+                  undefined,
                   accounts &&
-                    !accounts.find((account) => !account.isCityTreeActive)
+                    !accounts.find((account) => !account.isCarnivalActive)
                     ? false
                     : true
                 )
@@ -404,123 +420,109 @@ export default function Accounts() {
 
                 <td className="border border-zinc-800 px-2 text-center">
                   <div className="flex flex-col justify-center items-center">
-                    <span className="leading-none">{account.seeds}</span>
+                    <span className="leading-none">
+                      {account.carnivalSeedsQuantity}
+                    </span>
                     <span className="text-xs leading-none text-zinc-400">
-                      {account.currentSeed}
+                      {account.carnivalSeed}
                     </span>
                   </div>
                 </td>
 
-                <td
+                {/* <td
                   className={`border border-zinc-800 px-2 max-w-32 text-center ${
-                    new Date() > new Date(account.vipExpiration)
-                      ? ""
-                      : new Date() >
-                        AddDays(new Date(account.vipExpiration), -3)
-                      ? "text-red-400"
-                      : new Date() >
-                        AddDays(new Date(account.vipExpiration), -7)
-                      ? "text-orange-400"
-                      : "text-lime-400"
-                  }
-                  `}
-                >
-                  {new Date() > new Date(account.vipExpiration)
-                    ? "Free"
-                    : moment(account.vipExpiration).format("DD/MM/YYYY")}
-                </td>
-
-                <td
-                  className={`border border-zinc-800 px-2 max-w-32 text-center ${
-                    new Date() > new Date(account.vipUpdate)
-                      ? "text-red-400"
-                      : "text-lime-400"
-                  }`}
-                >
-                  {new Date() > new Date(account.vipExpiration)
-                    ? "-"
-                    : moment(account.vipUpdate).startOf("minutes").fromNow()}
-                </td>
-
-                <td className="border border-zinc-800 px-2 max-w-32 text-center">
-                  <div>
-                    {
-                      <p
-                        className={`leading-none ${
-                          account.landOneState === "EMPTY"
-                            ? ""
-                            : new Date() > new Date(account.landOneUpdate)
-                            ? "text-red-400"
-                            : "text-lime-400"
-                        }`}
-                      >
-                        {account.landOneState === "EMPTY"
-                          ? "Vazio "
-                          : "Coletar: " +
-                            moment(account.landOneUpdate)
-                              .startOf("minutes")
-                              .fromNow()}
-                      </p>
-                    }
-                  </div>
-                </td>
-
-                <td className="border border-zinc-800 px-2 max-w-32 text-center">
-                  <div>
-                    {
-                      <p
-                        className={`leading-none ${
-                          account.landTwoState === "EMPTY"
-                            ? ""
-                            : new Date() > new Date(account.landTwoUpdate)
-                            ? "text-red-400"
-                            : "text-lime-400"
-                        }`}
-                      >
-                        {account.landTwoState === "EMPTY"
-                          ? "Vazio "
-                          : "Coletar: " +
-                            moment(account.landTwoUpdate)
-                              .startOf("minutes")
-                              .fromNow()}
-                      </p>
-                    }
-                  </div>
-                </td>
-
-                <td className="border border-zinc-800 px-2 max-w-32 text-center">
-                  <div>
-                    {
-                      <p
-                        className={`leading-none ${
-                          account.landThreeState === "EMPTY"
-                            ? ""
-                            : new Date() > new Date(account.landThreeUpdate)
-                            ? "text-red-400"
-                            : "text-lime-400"
-                        }`}
-                      >
-                        {account.landThreeState === "EMPTY"
-                          ? "Vazio "
-                          : "Coletar: " +
-                            moment(account.landThreeUpdate)
-                              .startOf("minutes")
-                              .fromNow()}
-                      </p>
-                    }
-                  </div>
-                </td>
-
-                <td
-                  className={`border border-zinc-800 px-2 max-w-32 text-center ${
-                    !account.isCityTreeActive
+                    !account.isCarnivalActive
                       ? "text-gray-400"
-                      : new Date() > new Date(account.cityTreeUpdate)
+                      : new Date() > new Date(account.carnivalLandUpdate)
                       ? "text-red-400"
                       : "text-lime-400"
                   }`}
                 >
-                  {moment(account.cityTreeUpdate).startOf("minutes").fromNow()}
+                  <div className="flex flex-col justify-center items-center ">
+                    <span
+                      className={`leading-none ${
+                        new Date() > new Date(account.carnivalLandUpdate) ||
+                        account.carnivalLandState === "EMPTY"
+                          ? "text-red-400"
+                          : "text-lime-400"
+                      }`}
+                    >
+                      {account.carnivalLandState === "EMPTY"
+                        ? "Vazio"
+                        : account.carnivalLandState === "WATER"
+                        ? "Regar"
+                        : "Coletar"}
+                    </span>
+                    <span
+                      className={`text-xs leading-none ${
+                        new Date() > new Date(account.carnivalLandUpdate) ||
+                        account.carnivalLandState === "EMPTY"
+                          ? "text-red-400"
+                          : "text-lime-400"
+                      }`}
+                    >
+                      {account.carnivalLandState !== "EMPTY" &&
+                        moment(account.carnivalLandUpdate)
+                          .startOf("minutes")
+                          .fromNow()}
+                    </span>
+                  </div>
+                </td> */}
+
+                <td
+                  className={`border border-zinc-800 px-2 max-w-32 text-center`}
+                >
+                  <div>
+                    <p
+                      className={`leading-none ${
+                        account.carnivalLandState === "EMPTY"
+                          ? ""
+                          : new Date() > new Date(account.carnivalLandUpdate)
+                          ? "text-red-400"
+                          : "text-lime-400"
+                      }`}
+                    >
+                      {account.carnivalLandState === "EMPTY"
+                        ? "Vazio "
+                        : account.carnivalLandState === "WATER"
+                        ? "Regar: " +
+                          moment(account.carnivalLandUpdate)
+                            .startOf("minutes")
+                            .fromNow()
+                        : "Coletar: " +
+                          moment(account.carnivalLandUpdate)
+                            .startOf("minutes")
+                            .fromNow()}
+                    </p>
+                  </div>
+                </td>
+
+                <td
+                  className={`border border-zinc-800 px-2 max-w-32 text-center ${
+                    !account.isCarnivalActive
+                      ? "text-gray-400"
+                      : new Date() > new Date(account.carnivalUpdate)
+                      ? "text-red-400"
+                      : "text-lime-400"
+                  }`}
+                >
+                  {moment(account.carnivalUpdate).startOf("minutes").fromNow()}
+                </td>
+
+                <td
+                  className={
+                    "border border-zinc-800 px-2 max-w-32 text-center accent-lime-400"
+                  }
+                >
+                  <input
+                    type="checkbox"
+                    name="isCarnivalActive"
+                    id="isCarnivalActive"
+                    checked={account.isCarnivalActive}
+                    onChange={async () =>
+                      handleSetActive("isCarnivalActive", account.id)
+                    }
+                  />
                 </td>
               </tr>
             );

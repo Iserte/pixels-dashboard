@@ -6,7 +6,7 @@ export const revalidate = 60
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   const { id } = params
-  let account = await prisma.account.findUnique({ where: { id: Number(id) } })
+  let account = await prisma.account.findUnique({ where: { id: id } })
   if (account) {
     account = {
       ...account,

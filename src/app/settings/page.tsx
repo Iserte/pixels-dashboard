@@ -1,55 +1,35 @@
 "use client";
 
 import { Account } from "@prisma/client";
-import { UserCog2 } from "lucide-react";
-import moment from "moment";
-import "moment/locale/pt-br";
-import Link from "next/link";
 import Image from "next/image";
+import "moment/locale/pt-br";
 import { useEffect, useState } from "react";
 import { AddDays } from "@/utils/AddDays";
-import axios from "axios";
+import moment from "moment";
 
 interface IAccount extends Account {
   reputation: number;
 }
 
-export const headers = [
+const headers = [
   "Reputação",
   "Nome",
   "Energia",
   "Coins",
   "$PIXEL",
-  "Sementes",
   "VIP",
-  "Sauna VIP",
-  "Land #2130",
-  "Land #2131",
-  "Land #270",
   "Arvores",
+  "NuCyber",
+  "Carnival",
 ];
 
-export default function Accounts() {
+export default function Settings() {
   const [accounts, setAccounts] = useState<IAccount[]>();
-  const [pixelPrice, setPixelPrice] = useState(0);
 
   useEffect(() => {
-    getPixelsPrice();
     getAccounts();
     setInterval(getAccounts, 1 * 60 * 1000);
   }, []);
-
-  const getPixelsPrice = async () => {
-    setPixelPrice(
-      (
-        await (
-          await fetch(process.env.NEXT_PUBLIC_HOST_URL + "/api/accounts", {
-            cache: "no-cache",
-          })
-        ).json()
-      ).pixelUSD
-    );
-  };
 
   const getAccounts = async () => {
     setAccounts(
@@ -63,7 +43,11 @@ export default function Accounts() {
     );
   };
 
-  const handleSetActive = async (path: string, setStatus: boolean) => {
+  const handleSetActive = async (
+    path: string,
+    id: string | undefined = undefined,
+    setStatus: boolean | undefined = undefined
+  ) => {
     setAccounts(
       (
         await (
@@ -73,7 +57,7 @@ export default function Accounts() {
               "Content-Type": "application/json",
             },
             method: "PUT",
-            body: JSON.stringify({ path, setStatus }),
+            body: JSON.stringify({ path, id, setStatus }),
           })
         ).json()
       ).accounts
@@ -220,80 +204,11 @@ export default function Accounts() {
         </tr>
         <tr className="bg-zinc-950 border-b-2 border-zinc-700">
           <td className="px-2 text-center font-bold py-1">-</td>
-          <td className="px-2 text-center font-bold">-</td>
-          <td className="px-2 text-center font-bold">-</td>
-          <td className="px-2 text-center font-bold">
-            <div className="flex items-center justify-between gap-2">
-              <Image
-                alt="COIN"
-                width={1}
-                height={1}
-                src="/coin.png"
-                className="size-4"
-              />
-              <span>
-                {accounts &&
-                  accounts.length > 1 &&
-                  Intl.NumberFormat("pt-BR").format(
-                    accounts
-                      .map((acc) => acc.coin)
-                      .reduce((prev, curr) => prev + curr)
-                  )}
-              </span>
-            </div>
-          </td>
-          <td className="px-2 text-center font-bold">
-            <div className="flex items-center justify-between gap-2">
-              <Image
-                alt="$PIXEL"
-                width={1}
-                height={1}
-                src="/pixel.png"
-                className="size-4"
-              />
-              <span>
-                {`${
-                  accounts &&
-                  accounts.length > 1 &&
-                  Intl.NumberFormat("pt-BR").format(
-                    accounts
-                      .map((acc) => acc.pixel)
-                      .reduce((prev, curr) => prev + curr)
-                  )
-                } (${
-                  accounts &&
-                  accounts.length > 1 &&
-                  Intl.NumberFormat("pt-BR").format(
-                    accounts
-                      .filter((acc) => acc.reputation >= 600 && acc.pixel >= 20)
-                      .map((acc) => acc.pixel)
-                      .reduce((prev, curr) => prev + curr)
-                  )
-                } - ${
-                  accounts &&
-                  accounts.length > 1 &&
-                  Intl.NumberFormat("en-US", {
-                    style: "currency",
-                    currency: "USD",
-                  }).format(
-                    pixelPrice *
-                      accounts
-                        .filter(
-                          (acc) => acc.reputation >= 600 && acc.pixel >= 20
-                        )
-                        .map((acc) => acc.pixel)
-                        .reduce((prev, curr) => prev + curr)
-                  )
-                })`}
-              </span>
-            </div>
-          </td>
-          <td className="px-2 text-center font-bold">-</td>
-          <td className="px-2 text-center font-bold">-</td>
-          <td className="px-2 text-center font-bold">-</td>
-          <td className="px-2 text-center font-bold">-</td>
-          <td className="px-2 text-center font-bold">-</td>
-          <td className="px-2 text-center font-bold">-</td>
+          <td className="px-2 text-center font-bold py-1">-</td>
+          <td className="px-2 text-center font-bold py-1">-</td>
+          <td className="px-2 text-center font-bold py-1">-</td>
+          <td className="px-2 text-center font-bold py-1">-</td>
+          <td className="px-2 text-center font-bold py-1">-</td>
           <td className="px-2 text-center font-bold accent-lime-400">
             <input
               type="checkbox"
@@ -308,8 +223,54 @@ export default function Accounts() {
               onChange={async () =>
                 handleSetActive(
                   "isCityTreeActive",
+                  undefined,
                   accounts &&
                     !accounts.find((account) => !account.isCityTreeActive)
+                    ? false
+                    : true
+                )
+              }
+            />
+          </td>
+          <td className="px-2 text-center font-bold accent-lime-400">
+            <input
+              type="checkbox"
+              name="isNuCyberActive"
+              id="isNuCyberActive"
+              checked={
+                accounts && accounts.find((account) => !account.isNuCyberActive)
+                  ? false
+                  : true
+              }
+              onChange={async () =>
+                handleSetActive(
+                  "isNuCyberActive",
+                  undefined,
+                  accounts &&
+                    !accounts.find((account) => !account.isNuCyberActive)
+                    ? false
+                    : true
+                )
+              }
+            />
+          </td>
+          <td className="px-2 text-center font-bold accent-lime-400">
+            <input
+              type="checkbox"
+              name="isCarnivalActive"
+              id="isCarnivalActive"
+              checked={
+                accounts &&
+                accounts.find((account) => !account.isCarnivalActive)
+                  ? false
+                  : true
+              }
+              onChange={async () =>
+                handleSetActive(
+                  "isCarnivalActive",
+                  undefined,
+                  accounts &&
+                    !accounts.find((account) => !account.isCarnivalActive)
                     ? false
                     : true
                 )
@@ -326,17 +287,6 @@ export default function Accounts() {
                 key={account.id}
                 className="border-b border-zinc-800 hover:bg-zinc-700"
               >
-                {/* <td className="border border-zinc-800 px-2">
-                  <Link
-                    href={
-                      process.env.NEXT_PUBLIC_HOST_URL +
-                      `/accounts/${account.id}`
-                    }
-                  >
-                    <UserCog2 className="size-4 w-full hover:cursor-pointer" />
-                  </Link>
-                </td> */}
-
                 <td
                   className={`border border-zinc-800 px-2 text-center ${
                     account.reputation >= 600
@@ -401,16 +351,6 @@ export default function Accounts() {
                     <span>{account.pixel}</span>
                   </div>
                 </td>
-
-                <td className="border border-zinc-800 px-2 text-center">
-                  <div className="flex flex-col justify-center items-center">
-                    <span className="leading-none">{account.seeds}</span>
-                    <span className="text-xs leading-none text-zinc-400">
-                      {account.currentSeed}
-                    </span>
-                  </div>
-                </td>
-
                 <td
                   className={`border border-zinc-800 px-2 max-w-32 text-center ${
                     new Date() > new Date(account.vipExpiration)
@@ -429,99 +369,106 @@ export default function Accounts() {
                     ? "Free"
                     : moment(account.vipExpiration).format("DD/MM/YYYY")}
                 </td>
-
                 <td
-                  className={`border border-zinc-800 px-2 max-w-32 text-center ${
-                    new Date() > new Date(account.vipUpdate)
-                      ? "text-red-400"
-                      : "text-lime-400"
-                  }`}
+                  className={
+                    "border border-zinc-800 px-2 max-w-32 text-center accent-lime-400"
+                  }
                 >
-                  {new Date() > new Date(account.vipExpiration)
-                    ? "-"
-                    : moment(account.vipUpdate).startOf("minutes").fromNow()}
-                </td>
-
-                <td className="border border-zinc-800 px-2 max-w-32 text-center">
-                  <div>
-                    {
-                      <p
-                        className={`leading-none ${
-                          account.landOneState === "EMPTY"
-                            ? ""
-                            : new Date() > new Date(account.landOneUpdate)
-                            ? "text-red-400"
-                            : "text-lime-400"
-                        }`}
-                      >
-                        {account.landOneState === "EMPTY"
-                          ? "Vazio "
-                          : "Coletar: " +
-                            moment(account.landOneUpdate)
-                              .startOf("minutes")
-                              .fromNow()}
-                      </p>
+                  <input
+                    type="checkbox"
+                    name="isCityTreeActive"
+                    id="isCityTreeActive"
+                    checked={account.isCityTreeActive}
+                    onChange={async () =>
+                      handleSetActive("isCityTreeActive", account.id)
                     }
-                  </div>
-                </td>
-
-                <td className="border border-zinc-800 px-2 max-w-32 text-center">
-                  <div>
-                    {
-                      <p
-                        className={`leading-none ${
-                          account.landTwoState === "EMPTY"
-                            ? ""
-                            : new Date() > new Date(account.landTwoUpdate)
-                            ? "text-red-400"
-                            : "text-lime-400"
-                        }`}
-                      >
-                        {account.landTwoState === "EMPTY"
-                          ? "Vazio "
-                          : "Coletar: " +
-                            moment(account.landTwoUpdate)
-                              .startOf("minutes")
-                              .fromNow()}
-                      </p>
-                    }
-                  </div>
-                </td>
-
-                <td className="border border-zinc-800 px-2 max-w-32 text-center">
-                  <div>
-                    {
-                      <p
-                        className={`leading-none ${
-                          account.landThreeState === "EMPTY"
-                            ? ""
-                            : new Date() > new Date(account.landThreeUpdate)
-                            ? "text-red-400"
-                            : "text-lime-400"
-                        }`}
-                      >
-                        {account.landThreeState === "EMPTY"
-                          ? "Vazio "
-                          : "Coletar: " +
-                            moment(account.landThreeUpdate)
-                              .startOf("minutes")
-                              .fromNow()}
-                      </p>
-                    }
-                  </div>
+                  />
                 </td>
 
                 <td
-                  className={`border border-zinc-800 px-2 max-w-32 text-center ${
-                    !account.isCityTreeActive
-                      ? "text-gray-400"
-                      : new Date() > new Date(account.cityTreeUpdate)
-                      ? "text-red-400"
-                      : "text-lime-400"
-                  }`}
+                  className={
+                    "border border-zinc-800 px-2 max-w-32 text-center accent-lime-400"
+                  }
                 >
-                  {moment(account.cityTreeUpdate).startOf("minutes").fromNow()}
+                  <input
+                    type="checkbox"
+                    name="isNuCyberActive"
+                    id="isNuCyberActive"
+                    checked={account.isNuCyberActive}
+                    onChange={async () =>
+                      handleSetActive("isNuCyberActive", account.id)
+                    }
+                  />
                 </td>
+
+                <td
+                  className={
+                    "border border-zinc-800 px-2 max-w-32 text-center accent-lime-400"
+                  }
+                >
+                  <input
+                    type="checkbox"
+                    name="isCarnivalActive"
+                    id="isCarnivalActive"
+                    checked={account.isCarnivalActive}
+                    onChange={async () =>
+                      handleSetActive("isCarnivalActive", account.id)
+                    }
+                  />
+                </td>
+
+                {/* <td className="border border-zinc-800 px-2 max-w-32 text-center text-sm">
+                  {moment(account.mailUpdate).startOf("minutes").fromNow()}
+                </td> */}
+
+                {/* <td className="border border-zinc-800 px-2 max-w-32 text-center text-sm">
+                  {moment(account.carnivalUpdate).startOf("minutes").fromNow()}
+                </td> */}
+
+                {/* <td className="border border-zinc-800 px-2 max-w-32 text-center">
+                  <div>
+                    {account.landOneState === "FULL" ? (
+                      <p className="text-xs leading-none">
+                        {"Pronto " +
+                          moment(account.landOneUpdate)
+                            .startOf("minutes")
+                            .fromNow()}
+                      </p>
+                    ) : (
+                      <p className="leading-none">Vazio</p>
+                    )}
+                  </div>
+                </td>
+
+                <td className="border border-zinc-800 px-2 max-w-32 text-center">
+                  <div>
+                    {account.landTwoState === "FULL" ? (
+                      <p className="text-xs leading-none">
+                        {"Pronto " +
+                          moment(account.landTwoUpdate)
+                            .startOf("minutes")
+                            .fromNow()}
+                      </p>
+                    ) : (
+                      <p className="leading-none">Vazio</p>
+                    )}
+                  </div>
+                </td>
+
+                <td className="border border-zinc-800 px-2 max-w-32 text-center">
+                  <div>
+                    {account.landThreeState === "FULL" ? (
+                      <p className="text-xs leading-none">
+                        {"Pronto " +
+                          moment(account.landThreeUpdate)
+                            .startOf("minutes")
+                            .fromNow()}
+                      </p>
+                    ) : (
+                      <p className="leading-none">Vazio</p>
+                    )}
+                  </div>
+                </td> */}
               </tr>
             );
           })}

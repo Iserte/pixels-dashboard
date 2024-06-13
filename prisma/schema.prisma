@@ -11,9 +11,15 @@ datasource db {
 }
 
 model Account {
-  id              Int      @id @default(autoincrement())
+  id              String   @id @unique
+  isActive        Boolean  @default(true)
   name            String   @unique
-  isVip           Boolean  @default(false)
+  wallet          String   @unique
+  vipExpiration   DateTime @default(now())
+  levels          String   @default("{}")
+  createdAt       DateTime @default(now())
+  memberships     String   @default("{}")
+  quests          String   @default("{}")
   energy          Int      @default(1000)
   coin            Int      @default(0)
   pixel           Int      @default(0)
@@ -28,7 +34,24 @@ model Account {
   energyUpdate    DateTime @default(now())
   vipUpdate       DateTime @default(now())
   mailUpdate      DateTime @default(now())
-  carnivalUpdate  DateTime @default(now())
+
+  isCityTreeActive Boolean  @default(true)
+  cityTreeUpdate   DateTime @default(now())
+
+  isCarnivalActive      Boolean  @default(true)
+  carnivalUpdate        DateTime @default(now())
+  carnivalSeed          String   @default("Orange Grumpkin Seeds")
+  carnivalSeedsQuantity Int      @default(0)
+  carnivalLandState     String   @default("EMPTY")
+  carnivalLandUpdate    DateTime @default(now())
+
+  isNuCyberActive       Boolean  @default(true)
+  nuCyberFirstRun       Boolean  @default(true)
+  nuCyberUpdate         DateTime @default(now())
+  nuCyberBoxes          Int      @default(0)
+  nuCyberCraftName      String   @default("")
+  nuCyberCraftUpdate    DateTime @default(now())
+  nuCyberCraftAvailable Boolean  @default(true)
 
   tasks Tasks[]
   eggs  Eggs[]
@@ -40,10 +63,11 @@ model Tasks {
   itemQuantity   Int
   rewardType     String
   rewardQuantity Int
+  rewardExp      Int      @default(0)
   expiresAt      DateTime @default(now())
 
   account   Account @relation(fields: [accountId], references: [id])
-  accountId Int
+  accountId String
 }
 
 model Eggs {
@@ -52,7 +76,7 @@ model Eggs {
   landUpdate DateTime @default(now())
 
   account   Account @relation(fields: [accountId], references: [id])
-  accountId Int
+  accountId String
 
   @@unique([landId, accountId])
 }
