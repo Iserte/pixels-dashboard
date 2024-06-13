@@ -302,12 +302,17 @@ export default function NuCyber() {
                     currency: "USD",
                   }).format(
                     pixelPrice *
-                      accounts
-                        .filter(
-                          (acc) => acc.reputation >= 600 && acc.pixel >= 20
-                        )
-                        .map((acc) => acc.pixel)
-                        .reduce((prev, curr) => prev + curr)
+                      accounts.filter(
+                        (acc) => acc.reputation >= 600 && acc.pixel >= 20
+                      ).length >
+                      0
+                      ? accounts
+                          .filter(
+                            (acc) => acc.reputation >= 600 && acc.pixel >= 20
+                          )
+                          .map((acc) => acc.pixel)
+                          .reduce((prev, curr) => prev + curr)
+                      : 0
                   )
                 })`}
               </span>
