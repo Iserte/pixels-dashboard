@@ -440,7 +440,9 @@ export default function NuCyber() {
                       className="size-4"
                     />
                     <span>
-                      {JSON.parse(account.levels).business.level || 0}
+                      {JSON.parse(account.levels).business
+                        ? JSON.parse(account.levels).business.level
+                        : 0}
                     </span>
                   </div>
                 </td>
